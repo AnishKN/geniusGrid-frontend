@@ -1,16 +1,18 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar'
 
 function Layout() {
-//   const location = useLocation();
-//   let isPlaygroundPage = false
-//   if(location.pathname === '/playground' || location.pathname.startsWith('/problem/')){
-//    isPlaygroundPage = true;
-//   }
+  const location = useLocation();
+  let isAuther = false
+  
+  if(location.pathname === '/Login' || location.pathname === '/Register'){
+    isAuther = true;
+  }
 
   return (
     <>
-      {/* <Navbar /> */}
+      <Navbar hideNavbar={isAuther}/>
       <Outlet />
       {/* <Footer hideFooter={isPlaygroundPage} /> */}
     </>
