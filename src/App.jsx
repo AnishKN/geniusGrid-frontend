@@ -8,14 +8,14 @@ import Home from './pages/landing/Home'
 function App() {
   return (
       <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route path="" element={<Home />} />
-          <Route path="Login" element={<Login />} />
-          <Route path="Register" element={<Register />} />
-          <Route path="*" element={"Error 404"} />
-        </Route>
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route path="" element={<Home />} />
+            <Route path="Login" element={<Login />} />
+            <Route path="Register" element={<Register />} />
+            <Route path="*" element={"Error 404"} />
+          </Route>
+        </Routes>
     </BrowserRouter>
   )
 }
