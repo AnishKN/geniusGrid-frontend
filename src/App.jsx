@@ -4,6 +4,7 @@ import Layout from "./Layout";
 import Register from './pages/authentication/Register'
 import Login from './pages/authentication/Login'
 import Home from './pages/landing/Home'
+import Dashboard from './pages/authentication/Dashboard'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
             <Route path="" element={<Home />} />
             <Route path="Login" element={<Login />} />
             <Route path="Register" element={<Register />} />
+            <Route path="Dashboard" element={<Dashboard />} />
             <Route path="*" element={"Error 404"} />
           </Route>
         </Routes>

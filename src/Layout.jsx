@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar'
+import Footer from './components/Footer';
 
 function Layout() {
   const location = useLocation();
@@ -14,7 +15,7 @@ function Layout() {
     <>
       <Navbar hideNavbar={isAuther}/>
       <Outlet />
-      {/* <Footer hideFooter={isPlaygroundPage} /> */}
+      <Footer hideFooter={isAuther} />
     </>
   );
 }
