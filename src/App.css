@@ -1,0 +1,26 @@
+.main-wrapper{
+    background: url('./assets/h1_hero.png.webp');
+    background-position: center;
+    background-size: cover;
+}
+.sub-wrapper h1{
+    font-size: 50px;
+    line-height: 1.2;
+}
+.sub-wrapper p{
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 34px;
+}
+.button-btn{
+    background: #FF9F67;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+}
+.button-btn:hover{
+    background: #e77f43;
+    padding: 10px 20px;
+    border-radius: 20px;
+    transition: 0.1s ease-in-out;
+}

@@ -15,24 +15,28 @@ const Navbar = ({ hideNavbar }) => {
      <header className="sticky top-0 bg-white shadow-lg z-50">
         <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
           <div className="flex lg:flex-1">
-            <NavLink to="/" className="-m-1.5 p-1.5">
+            <NavLink to="/" className="flex p-1.5 justify-center items-center gap-3">
               <img
                 className="h-8 w-auto"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                alt=""
+                src="/logo.png"
+                alt="logo"
               />
+              <h1 className='text-lg'><b>GeniusGrid</b></h1>
             </NavLink>
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
             {navigation.map((item) => (
-              <NavLink to={item.href}  key={item.name} className="text-sm font-semibold leading-6 text-gray-900">
+              <NavLink to={item.href}  key={item.name} className="text-sm font-bold leading-6 text-gray-900">
                 {item.name}
               </NavLink>
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <NavLink to="/Login" className="text-sm font-semibold leading-6 text-gray-900">
-              Log in <span aria-hidden="true">&rarr;</span>
+            <NavLink to="/Login">
+            <button className="text-sm bg-gray-800 w-full text-white rounded-lg
+            px-8 py-3 block shadow-xl hover:text-white hover:bg-black">
+            Login
+            </button>
             </NavLink>
           </div>
         </nav>

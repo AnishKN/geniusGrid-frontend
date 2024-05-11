@@ -7,7 +7,11 @@ function Layout() {
   const location = useLocation();
   let isAuther = false
   
-  if(location.pathname === '/Login' || location.pathname === '/Register'){
+  if(location.pathname === '/Login' || 
+     location.pathname === '/Register' ||
+     location.pathname === '/SetupOne' ||
+     location.pathname === '/SetupTwo' ||
+     location.pathname === '/SetupThree'){
     isAuther = true;
   }
 
