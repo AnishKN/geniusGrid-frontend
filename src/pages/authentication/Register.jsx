@@ -47,15 +47,15 @@ function Register() {
   const handleRegister = ()=>{
     setIsLoading(true)
     setTimeout(() => {
-      // axios.request(config)
-      // .then((response) => {
-      //   console.log(JSON.stringify(response.data));
-        navigate("/SetupOne")
-      // })
-      // .catch((error) => {
-      //   let message = error.response.data.errors[0].msg
-      //   toast.error(message)
-      // });
+      axios.request(config)
+      .then((response) => {
+        console.log(JSON.stringify(response.data));
+        navigate("/setupOne")
+      })
+      .catch((error) => {
+        let message = error.response.data.errors[0].msg
+        toast.error(message)
+      });
       setIsLoading(false);
     }, 2000);
   }
@@ -166,7 +166,7 @@ function Register() {
             {!isLoading && "Register"}
           </button>
           <div className="mt-6 text-gray-500 text-center">
-          <NavLink to="/Login">
+          <NavLink to="/login">
             <p className="hover:underline">
               Login up Here
             </p>

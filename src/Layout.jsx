@@ -1,25 +1,28 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar'
-import Footer from './components/Footer';
+import Header from './components/General/Header'
+import Footer from './components/General/Footer';
 
 function Layout() {
   const location = useLocation();
-  let isAuther = false
+  const pathsToHide = [
+    '/login', 
+    '/register', 
+    '/setupOne', 
+    '/setupTwo', 
+    '/setupThree',
+    '/dashboard'
+  ];
+
+const hideNavbar = pathsToHide.some(path => location.pathname.startsWith(path));
+const hideFooter = hideNavbar;
   
-  if(location.pathname === '/Login' || 
-     location.pathname === '/Register' ||
-     location.pathname === '/SetupOne' ||
-     location.pathname === '/SetupTwo' ||
-     location.pathname === '/SetupThree'){
-    isAuther = true;
-  }
 
   return (
     <>
-      <Navbar hideNavbar={isAuther}/>
+      <Header hideNavbar={hideNavbar}/>
       <Outlet />
-      <Footer hideFooter={isAuther} />
+      <Footer hideFooter={hideFooter} />
     </>
   );
 }
