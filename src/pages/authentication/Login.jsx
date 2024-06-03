@@ -28,15 +28,15 @@ function Login() {
   const handleLogin = ()=>{
     setIsLoading(true)
     setTimeout(() => {
-      // axios.request(config)
-      // .then((response) => {
-      //   localStorage.setItem("authToken",response.data.token)
-        navigate("/Dashboard")
-      // })
-      // .catch((error) => {
-      //   let message = error.response.data.errors[0].msg
-      //   toast.error(message)
-      // });
+      axios.request(config)
+      .then((response) => {
+        localStorage.setItem("authToken",response.data.token)
+        navigate("/dashboard")
+      })
+      .catch((error) => {
+        let message = error.response.data.errors[0].msg
+        toast.error(message)
+      });
       setIsLoading(false);
     }, 2000);
   }
@@ -95,7 +95,7 @@ function Login() {
             {!isLoading && "Login"}
           </button>
           <div className="mt-6 text-gray-500 text-center">
-            <NavLink to="/Register">
+            <NavLink to="/register">
               <p href="#" className="hover:underline">
                 Register Here
               </p>

@@ -1,5 +1,5 @@
 import React,{ useState } from "react";
-import Sidebar from "../../../components/Sidebar";
+import Sidebar from "../../../components/General/Sidebar";
 import { Waveform } from "@uiball/loaders";
 import { useNavigate } from "react-router-dom";
 
@@ -10,7 +10,7 @@ function SetupOne() {
   const handleClick = ()=>{
     setIsLoading(true)
     setTimeout(() => {
-      navigate("/SetupTwo")
+      navigate("/setupTwo")
       setIsLoading(false);
     }, 1000);
   }

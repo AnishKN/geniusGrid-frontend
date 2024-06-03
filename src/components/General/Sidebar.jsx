@@ -6,9 +6,9 @@ function Sidebar() {
 
   const shouldHighlightNumber = (pathname, number) => {
     if (
-      (pathname === '/SetupOne' && number === 1) ||
-      (pathname === '/SetupTwo' && number === 2) ||
-      (pathname === '/SetupThree' && number === 3)
+      (pathname === '/setupOne' && number === 1) ||
+      (pathname === '/setupTwo' && number === 2) ||
+      (pathname === '/setupThree' && number === 3)
     ) {
       return true; 
     }

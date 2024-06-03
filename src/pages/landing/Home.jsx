@@ -22,20 +22,20 @@ const responsive = {
 export default function Example() {
   return (
     <>
-      <section className="h-screen w-full py-12 md:py-24 lg:py-32 xl:py-48">
+      <section className="bg-custom-grad h-screen w-full py-12 md:py-24 lg:py-32 xl:py-48">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+              <h1 className=" text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
               Never forget a class or assignment again.
               </h1>
-              <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl dark:text-gray-400">
+              <p className="mx-auto max-w-[700px] md:text-xl">
               Unlock your potential and manage your classes, tasks and exams with GeniusGrid- the world's #1 student planner and school organizer app.
               </p>
             </div>
             <div className="space-x-4">
-              <NavLink to="/">
-                <button className="h-9 items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
+              <NavLink to="/login">
+                <button className="h-9 items-center justify-center rounded-md bg-violet-500 px-4 py-2 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-violet-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50">
                   Get Started
                 </button>
               </NavLink>
@@ -44,20 +44,20 @@ export default function Example() {
         </div>
       </section>
       
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-white">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-emerald-900">
                 Features That Matter
               </h2>
-              <p className="max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+              <p className="max-w-[700px] text-emerald-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
                 Discover the powerful features that make our product stand out.
               </p>
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 sm:grid-cols-2 md:grid-cols-3 lg:gap-10">
-            <div className="flex flex-col items-start gap-4 rounded-lg bg-white p-6 shadow-sm transition-all hover:bg-gray-50 ">
+            <div className="flex flex-col items-start gap-4 rounded-lg bg-white p-6 shadow-sm transition-all hover:bg-violet-50 ">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 ">
                 <svg
                   className="w-6 h-6 text-gray-800"
