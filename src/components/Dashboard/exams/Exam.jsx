@@ -9,18 +9,40 @@ function Exam() {
   let exm = false;
   const [allSubjects, setAllSubjects] = useState([]);
   const [allExams, setAllExams] = useState([]);
+  const [subjectName, setSubjectName] = useState("");
+  const [examType, setExamType] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [slot, setSlot] = useState("");
+  const [room, setRoom] = useState("");
 
   useEffect(() => {
-    let getConfig = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: "http://localhost:5000/subjects/getSubjects",
-      headers: {},
-    };
+    // get all subjects to show in options
+
     axios
-      .request(getConfig)
+      .request({
+        method: "get",
+        maxBodyLength: Infinity,
+        url: "http://localhost:5000/subjects/getSubjects",
+        headers: {},
+      })
       .then((response) => {
         setAllSubjects(response.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+    // get all the exams which added
+    axios
+      .request({
+        method: "get",
+        maxBodyLength: Infinity,
+        url: "http://localhost:5000/exams/getExam",
+        headers: {},
+      })
+      .then((response) => {
+        setAllExams(response.data)
       })
       .catch((error) => {
         console.log(error);
@@ -31,9 +53,36 @@ function Exam() {
     exm = true;
   }
 
-  const handleAddExam = ()=>{
+  const handleAddExam = () => {
+    axios.request({
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: 'http://localhost:5000/exams/createExam',
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      data : JSON.stringify({
+        "subjectName": subjectName,
+        "examType": examType,
+        "date": date,
+        "time": time,
+        "slot": slot,
+        "room": room,
+        "status": "active"
+      })
+    })
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      setAllExams((prevExams) => [...prevExams, response.data]);
+        if (modalRef.current) {
+          modalRef.current.classList.add("hidden");
+        }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 
-  }
+  };
   return (
     <>
       {exm ? (
@@ -51,7 +100,7 @@ function Exam() {
           </h1>
           <div className="my-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {allExams.map((exam) => (
-              <ExamCard key={exam._id} subject={exam} />
+              <ExamCard key={exam._id} exam={exam} />
             ))}
           </div>
         </div>
@@ -72,7 +121,7 @@ function Exam() {
           ref={modalRef}
           tabIndex="-1"
           aria-hidden="true"
-          className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-gray-900 bg-opacity-50 backdrop-blur"
+          className="hidden absolute h-screen w-full top-0 left-0 flex justify-center items-center backdrop-blur-lg"
         >
           <div className="relative p-4 w-full max-w-md max-h-full">
             <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
@@ -108,75 +157,115 @@ function Exam() {
                 <div className="grid gap-4 mb-4 grid-cols-2">
                   <div className="col-span-2">
                     <label
-                      htmlFor="subName"
+                      htmlFor="Subject"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
-                      Exam name
-                    </label>
-                    <input
-                      type="text"
-                      name="subName"
-                      id="subName"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type subject name"
-                      // value={subName}
-                      // onChange={(e) => setSubName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="Teacher"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Teacher
-                    </label>
-                    <input
-                      type="text"
-                      name="Teacher"
-                      id="Teacher"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type teacher name"
-                      // value={teacher}
-                      // onChange={(e) => setTeacher(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="color"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
-                      Subject Color
+                      Exam Subject
                     </label>
                     <select
-                      id="color"
+                      id="Subject"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      // value={color}
-                      // onChange={(e) => setColor(e.target.value)}
+                      value={subjectName}
+                      onChange={(e) => setSubjectName(e.target.value)}
                     >
-                      <option defaultValue={""}>Select color</option>
-                      <option value="lime">Lime</option>
-                      <option value="sky">Sky</option>
-                      <option value="purple">Purple</option>
-                      <option value="rose">Rose</option>
+                      <option defaultValue={""}>Select the Subject</option>
+                      {allSubjects.map((subject) => (
+                        <option value={subject.subName}>
+                          {subject.subName}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="col-span-2">
                     <label
-                      htmlFor="description"
+                      htmlFor="Type"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                     >
-                      Subject Description
+                      Exam Type
                     </label>
-                    <textarea
-                      id="description"
-                      rows="4"
-                      className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Write Subject description here"
-                      // value={desc}
-                      // onChange={(e) => setDesc(e.target.value)}
-                    ></textarea>
+                    <select
+                      id="Type"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      value={examType}
+                      onChange={(e) => setExamType(e.target.value)}
+                    >
+                      <option defaultValue={""}>Select Exam Type</option>
+                      <option value={"Finals"}>Finals</option>
+                      <option value={"Internal"}>Internal</option>
+                      <option value={"Class Test"}>Class Test</option>
+                    </select>
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      htmlFor="Date"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      name="Date"
+                      id="Date"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Type teacher name"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      htmlFor="Time"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      name="Time"
+                      id="Time"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Type teacher name"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      htmlFor="Slot"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Slot No
+                    </label>
+                    <input
+                      type="text"
+                      name="Slot"
+                      id="Slot"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Type Slot No"
+                      value={slot}
+                      onChange={(e) => setSlot(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label
+                      htmlFor="Room"
+                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      Room No
+                    </label>
+                    <input
+                      type="text"
+                      name="Room"
+                      id="Room"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      placeholder="Type Room No"
+                      value={room}
+                      onChange={(e) => setRoom(e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
                 <button
@@ -196,7 +285,7 @@ function Exam() {
                       clipRule="evenodd"
                     ></path>
                   </svg>
-                  Add new Subject
+                  Add Exam
                 </button>
               </div>
             </div>

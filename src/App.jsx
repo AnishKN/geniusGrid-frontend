@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./Layout";
 import Register from './pages/authentication/Register'
@@ -13,6 +13,8 @@ import { SaasProvider, theme as baseTheme } from '@saas-ui/react'
 import './App.css'
 import "react-multi-carousel/lib/styles.css";
 import 'react-toastify/dist/ReactToastify.css';
+import WOW from 'wowjs';
+import NotFound from './pages/landing/NotFound';
 
 const colors = {
   brand: {
@@ -25,6 +27,11 @@ const colors = {
 const theme = extendTheme({ colors }, baseTheme)
 
 function App() {
+  
+  useEffect(() => {
+    new WOW.WOW().init();
+  }, []);
+  
   return (
     <SaasProvider theme={theme}>
       <BrowserRouter>
@@ -38,7 +45,7 @@ function App() {
             <Route path="setupTwo" element={<SetupTwo />} />
             <Route path="setupThree" element={<SetupThree />} />
 
-            <Route path="*" element={"Error 404"} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
     </BrowserRouter>
