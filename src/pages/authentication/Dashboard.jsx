@@ -21,7 +21,7 @@ export default function Dashboard() {
         <Routes>
           <Route path="/" element={(
             <div>
-              <h1>Dashboard</h1>
+              This page is still in development
             </div>
           )} />
           <Route path="subjects" element={<Subject />} />

@@ -63,7 +63,7 @@ function Register() {
   return (
     <>
     <NavLink to="/">
-      <img src="/logo.png" alt="logo" className="absolute m-4 h-8 w-8" />
+      <img src="/GG_logo-removebg-preview.png" alt="logo" className="absolute m-4 h-8" />
     </NavLink>
       <div className="bg-white flex justify-center items-center h-full">
       <ToastContainer />

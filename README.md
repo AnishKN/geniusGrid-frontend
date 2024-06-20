@@ -19,3 +19,5 @@ Go to github repo in chrome and merge the branch
 git checkout main
 git pull origin main
 ```
+
+https://picsum.photos/600/400/?random
