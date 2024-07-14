@@ -5,73 +5,85 @@ import EventCard from "../events/EventCard";
 import { ImSad } from "react-icons/im";
 
 function Event() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const modalRef = useRef(null);
-  let evt = false;
-
   const [allEvents, setAllEvents] = useState([]);
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [venue, setVenue] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("active");
   const [desc, setDesc] = useState("");
 
   useEffect(() => {
-    // get all subjects to show in options
+    fetchEvents();
+  }, []);
 
+  const fetchEvents = () => {
     axios
-      .request({
-        method: "get",
-        maxBodyLength: Infinity,
-        url: "http://localhost:5000/events/getEvents",
-        headers: {},
-      })
+      .get(`${backendUrl}events/getEvents`)
       .then((response) => {
         setAllEvents(response.data);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Error fetching events:", error);
       });
-  }, []);
-
-  if (allEvents.length === 0) {
-    evt = true;
-  }
-
-  const handleAddExam = () => {
-    axios.request({
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: 'http://localhost:5000/events/creeateEvent',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
-      data : JSON.stringify({
-        "name": name,
-        "type": type,
-        "date": date,
-        "time": time,
-        "venue": venue,
-        "desc": desc,
-        "status": "active"
-      })
-    })
-    .then((response) => {
-      console.log(JSON.stringify(response.data));
-      setAllEvents((prevEvents) => [...prevEvents, response.data]);
-        if (modalRef.current) {
-          modalRef.current.classList.add("hidden");
-        }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
   };
+
+  const handleAddEvent = () => {
+    const addConfig = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${backendUrl}events/createEvent`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({
+        name,
+        type,
+        date,
+        time,
+        venue,
+        desc,
+        status,
+      }),
+    };
+
+    axios
+      .request(addConfig)
+      .then((response) => {
+        console.log("Event added:", response.data);
+        setAllEvents((prevEvents) => [...prevEvents, response.data]);
+        closeModal();
+        fetchEvents(); // Refresh events list after adding
+      })
+      .catch((error) => {
+        console.log("Error adding event:", error);
+      });
+  };
+
+  const openModal = () => {
+    if (modalRef.current) {
+      modalRef.current.classList.remove("hidden");
+    }
+  };
+
+  const closeModal = () => {
+    setName("");
+    setType("");
+    setDate("");
+    setTime("");
+    setVenue("");
+    setDesc("");
+    if (modalRef.current) {
+      modalRef.current.classList.add("hidden");
+    }
+  };
+
   return (
     <>
-      {evt ? (
+      {allEvents.length === 0 ? (
         // No Events found
         <div className="h-full flex flex-col gap-8 justify-center items-center">
           <h1 className="text-xl">No Upcoming Events!</h1>
@@ -80,7 +92,7 @@ function Event() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="p-4">
           <h1 className="text-2xl">
             <b>Events:</b>
           </h1>
@@ -92,13 +104,12 @@ function Event() {
         </div>
       )}
 
-      {/* Add subject Modal */}
+      {/* Add event Modal */}
       <div>
         <button
           type="button"
           className="fixed bottom-6 right-6 rounded-full flex justify-center items-center text-white bg-blue-400 h-12 w-12 shadow-lg cursor-pointer hover:bg-blue-500"
-          data-modal-toggle="crud-modal"
-          onClick={() => modalRef.current.classList.remove("hidden")}
+          onClick={openModal}
         >
           <GrAdd />
         </button>
@@ -107,23 +118,21 @@ function Event() {
           ref={modalRef}
           tabIndex="-1"
           aria-hidden="true"
-          className="hidden absolute h-screen w-full top-0 left-0 flex justify-center items-center backdrop-blur-lg"
+          className="hidden fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg"
         >
-          <div className="relative p-4 w-full max-w-md max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Add new Event
+          <div className="relative p-4 w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-lg">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Add New Event
                 </h3>
                 <button
                   type="button"
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  data-modal-toggle="crud-modal"
-                  onClick={() => modalRef.current.classList.add("hidden")}
+                  className="text-gray-500 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                  onClick={closeModal}
                 >
                   <svg
                     className="w-3 h-3"
-                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 14 14"
@@ -139,100 +148,97 @@ function Event() {
                   <span className="sr-only">Close modal</span>
                 </button>
               </div>
-              <div className="p-4 md:p-5">
-                <div className="grid gap-4 mb-4 grid-cols-2">
-                  <div className="col-span-2">
-                    <label
-                      htmlFor="Type"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
+              <div className="p-4">
+                <div className="grid gap-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-900">
+                      Event Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-900">
                       Event Type
                     </label>
                     <select
-                      id="Type"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      id="type"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={type}
                       onChange={(e) => setType(e.target.value)}
+                      required
                     >
-                      <option defaultValue={""}>Select Exam Type</option>
-                      <option value={"Finals"}>Finals</option>
-                      <option value={"Internal"}>Internal</option>
-                      <option value={"Class Test"}>Class Test</option>
+                      <option value="">Select Event Type</option>
+                      <option value="Workshop">Workshop</option>
+                      <option value="Seminar">Seminar</option>
+                      <option value="Conference">Conference</option>
+                      <option value="Meetup">Meetup</option>
                     </select>
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="Date"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
+                  <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-900">
                       Date
                     </label>
                     <input
                       type="date"
-                      name="Date"
-                      id="Date"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type teacher name"
+                      id="date"
+                      className="w-full px-3 py-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="Time"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
+                  <div>
+                    <label htmlFor="time" className="block text-sm font-medium text-gray-900">
                       Time
                     </label>
                     <input
                       type="time"
-                      name="Time"
-                      id="Time"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type teacher name"
+                      id="time"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <label
-                      htmlFor="Slot"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                    >
+                  <div>
+                    <label htmlFor="venue" className="block text-sm font-medium text-gray-900">
                       Venue
                     </label>
                     <input
                       type="text"
-                      name="Slot"
-                      id="Slot"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type Slot No"
+                      id="venue"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={venue}
                       onChange={(e) => setVenue(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="desc" className="block text-sm font-medium text-gray-900">
+                      Description
+                    </label>
+                    <textarea
+                      id="desc"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={desc}
+                      onChange={(e) => setDesc(e.target.value)}
                       required
                     />
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  onClick={handleAddExam}
+                  className="mt-4 w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={handleAddEvent}
                 >
-                  <svg
-                    className="me-1 -ms-1 w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  Add Exam
+                  Add Event
                 </button>
               </div>
             </div>
@@ -244,3 +250,4 @@ function Event() {
 }
 
 export default Event;
+

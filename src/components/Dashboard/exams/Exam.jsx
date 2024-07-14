@@ -5,8 +5,8 @@ import axios from "axios";
 import ExamCard from "./ExamCard";
 
 function Exam() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const modalRef = useRef(null);
-  let exm = false;
   const [allSubjects, setAllSubjects] = useState([]);
   const [allExams, setAllExams] = useState([]);
   const [subjectName, setSubjectName] = useState("");
@@ -15,78 +15,81 @@ function Exam() {
   const [time, setTime] = useState("");
   const [slot, setSlot] = useState("");
   const [room, setRoom] = useState("");
+  const [noExams, setNoExams] = useState(false);
 
   useEffect(() => {
-    // get all subjects to show in options
+    fetchSubjects();
+    fetchExams();
+  }, []);
 
+  const fetchSubjects = () => {
     axios
-      .request({
-        method: "get",
-        maxBodyLength: Infinity,
-        url: "http://localhost:5000/subjects/getSubjects",
-        headers: {},
-      })
+      .get(`${backendUrl}subjects/getSubjects`)
       .then((response) => {
         setAllSubjects(response.data);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Error fetching subjects:", error);
       });
+  };
 
-    // get all the exams which added
+  const fetchExams = () => {
     axios
-      .request({
-        method: "get",
-        maxBodyLength: Infinity,
-        url: "http://localhost:5000/exams/getExam",
-        headers: {},
-      })
+      .get(`${backendUrl}exams/getExam`)
       .then((response) => {
-        setAllExams(response.data)
+        setAllExams(response.data);
+        if (response.data.length === 0) {
+          setNoExams(true);
+        }
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Error fetching exams:", error);
       });
-  }, []);
-
-  if (allExams.length === 0) {
-    exm = true;
-  }
+  };
 
   const handleAddExam = () => {
-    axios.request({
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: 'http://localhost:5000/exams/createExam',
-      headers: { 
-        'Content-Type': 'application/json'
-      },
-      data : JSON.stringify({
-        "subjectName": subjectName,
-        "examType": examType,
-        "date": date,
-        "time": time,
-        "slot": slot,
-        "room": room,
-        "status": "active"
+    axios
+      .post(`${backendUrl}exams/createExam`, {
+        subjectName,
+        examType,
+        date,
+        time,
+        slot,
+        room,
+        status: "active",
       })
-    })
-    .then((response) => {
-      console.log(JSON.stringify(response.data));
-      setAllExams((prevExams) => [...prevExams, response.data]);
-        if (modalRef.current) {
-          modalRef.current.classList.add("hidden");
-        }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
+      .then((response) => {
+        console.log("Exam added:", response.data);
+        setAllExams([...allExams, response.data]);
+        closeModal();
+        fetchExams(); // Refresh exams list after adding
+      })
+      .catch((error) => {
+        console.log("Error adding exam:", error);
+      });
   };
+
+  const openModal = () => {
+    if (modalRef.current) {
+      modalRef.current.classList.remove("hidden");
+    }
+  };
+
+  const closeModal = () => {
+    setSubjectName("");
+    setExamType("");
+    setDate("");
+    setTime("");
+    setSlot("");
+    setRoom("");
+    if (modalRef.current) {
+      modalRef.current.classList.add("hidden");
+    }
+  };
+
   return (
     <>
-      {exm ? (
-        // No subjects found
+      {noExams ? (
         <div className="h-full flex flex-col gap-8 justify-center items-center">
           <h1 className="text-xl">No Upcoming Exams!</h1>
           <div className="text-4xl">
@@ -94,7 +97,7 @@ function Exam() {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="p-4">
           <h1 className="text-2xl">
             <b>Exams:</b>
           </h1>
@@ -106,13 +109,12 @@ function Exam() {
         </div>
       )}
 
-      {/* Add subject Modal */}
+      {/* Add exam Modal */}
       <div>
         <button
           type="button"
           className="fixed bottom-6 right-6 rounded-full flex justify-center items-center text-white bg-blue-400 h-12 w-12 shadow-lg cursor-pointer hover:bg-blue-500"
-          data-modal-toggle="crud-modal"
-          onClick={() => modalRef.current.classList.remove("hidden")}
+          onClick={openModal}
         >
           <GrAdd />
         </button>
@@ -121,23 +123,21 @@ function Exam() {
           ref={modalRef}
           tabIndex="-1"
           aria-hidden="true"
-          className="hidden absolute h-screen w-full top-0 left-0 flex justify-center items-center backdrop-blur-lg"
+          className="hidden fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg"
         >
-          <div className="relative p-4 w-full max-w-md max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Add new Exam
+          <div className="relative p-4 w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-lg">
+              <div className="flex items-center justify-between p-4 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Add New Exam
                 </h3>
                 <button
                   type="button"
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  data-modal-toggle="crud-modal"
-                  onClick={() => modalRef.current.classList.add("hidden")}
+                  className="text-gray-500 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                  onClick={closeModal}
                 >
                   <svg
                     className="w-3 h-3"
-                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 14 14"
@@ -153,140 +153,124 @@ function Exam() {
                   <span className="sr-only">Close modal</span>
                 </button>
               </div>
-              <div className="p-4 md:p-5">
-                <div className="grid gap-4 mb-4 grid-cols-2">
-                  <div className="col-span-2">
+              <div className="p-4">
+                <div className="grid gap-4">
+                  <div>
                     <label
-                      htmlFor="Subject"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="subjectName"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Exam Subject
                     </label>
                     <select
-                      id="Subject"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      id="subjectName"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={subjectName}
                       onChange={(e) => setSubjectName(e.target.value)}
+                      required
                     >
-                      <option defaultValue={""}>Select the Subject</option>
+                      <option value="">Select Exam Subject</option>
                       {allSubjects.map((subject) => (
-                        <option value={subject.subName}>
+                        <option key={subject._id} value={subject.subName}>
                           {subject.subName}
                         </option>
                       ))}
                     </select>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label
-                      htmlFor="Type"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="examType"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Exam Type
                     </label>
                     <select
-                      id="Type"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      id="examType"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={examType}
                       onChange={(e) => setExamType(e.target.value)}
+                      required
                     >
-                      <option defaultValue={""}>Select Exam Type</option>
-                      <option value={"Finals"}>Finals</option>
-                      <option value={"Internal"}>Internal</option>
-                      <option value={"Class Test"}>Class Test</option>
+                      <option value="">Select Exam Type</option>
+                      <option value="Finals">Finals</option>
+                      <option value="Internal">Internal</option>
+                      <option value="Class Test">Class Test</option>
                     </select>
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
-                      htmlFor="Date"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="date"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Date
                     </label>
                     <input
                       type="date"
-                      name="Date"
-                      id="Date"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type teacher name"
+                      id="date"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
-                      htmlFor="Time"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="time"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Time
                     </label>
                     <input
                       type="time"
-                      name="Time"
-                      id="Time"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type teacher name"
+                      id="time"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
-                      htmlFor="Slot"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="slot"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Slot No
                     </label>
                     <input
                       type="text"
-                      name="Slot"
-                      id="Slot"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type Slot No"
+                      id="slot"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={slot}
                       onChange={(e) => setSlot(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
-                      htmlFor="Room"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="room"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Room No
                     </label>
                     <input
                       type="text"
-                      name="Room"
-                      id="Room"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                      placeholder="Type Room No"
+                      id="room"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={room}
                       onChange={(e) => setRoom(e.target.value)}
                       required
                     />
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  onClick={handleAddExam}
-                >
-                  <svg
-                    className="me-1 -ms-1 w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-sm text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                    onClick={handleAddExam}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  Add Exam
-                </button>
+                    Add Exam
+                  </button>
+                </div>
               </div>
             </div>
           </div>
