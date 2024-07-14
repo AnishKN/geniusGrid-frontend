@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import Carousel from "react-multi-carousel";
 import { PersonaAvatar } from "@saas-ui/react";
-import { WOW } from "wowjs";
+import WOW from 'wowjs';
 import Animate from "../../components/General/Animate";
 
 const responsive = {
@@ -70,7 +70,7 @@ const features = [
 
 export default function Example() {
   useEffect(() => {
-    const wow = new WOW();
+    const wow = new WOW.WOW();
     wow.init();
   }, []);
 
