@@ -9,7 +9,7 @@ const components = {
     switch (eventType) {
       case "Reg":
         return (
-          <div style={{ background: "red", color: "white", height: "100%" }}>{props.title}</div>
+          <div style={{ background: "blue", color: "white", height: "100%" }}>{props.title}</div>
         );
       case "App":
         return (
@@ -25,14 +25,15 @@ const components = {
 
 export default function ControlCalendar() {
   const [allExams, setAllExams] = useState([]);
-
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  
   // get all exams and store in allExams
   useEffect(() => {
     axios
       .request({
         method: "get",
         maxBodyLength: Infinity,
-        url: "http://localhost:5000/exams/getExam",
+        url: `${backendUrl}exams/getExam`,
         headers: {},
       })
       .then((response) => {
@@ -59,5 +60,9 @@ export default function ControlCalendar() {
     };
   });
 
-  return <Calendar events={events} components={components} />;
+  return(
+    <div className="p-4 h-full w-full">
+      <Calendar events={events} components={components} />
+    </div>
+  )
 }

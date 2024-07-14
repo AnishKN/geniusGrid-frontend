@@ -4,27 +4,22 @@ import { GrAdd } from "react-icons/gr";
 import axios from "axios";
 import SubjectCard from "./SubjectCard";
 
-let getConfig = {
-  method: "get",
-  maxBodyLength: Infinity,
-  url: "http://localhost:5000/subjects/getSubjects",
-  headers: {},
-};
 
 function Subject() {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const modalRef = useRef(null);
-  let sub = false;
   const [allSubjects, setAllSubjects] = useState([]);
   const [subName, setSubName] = useState("");
   const [teacher, setTeacher] = useState("");
   const [color, setColor] = useState("");
   const [desc, setDesc] = useState("");
+  const [noSubjects, setNoSubjects] = useState(false);
 
   const handleAddSubject = () => {
     let addConfig = {
       method: "post",
       maxBodyLength: Infinity,
-      url: "http://localhost:5000/subjects/createSubject",
+      url: `${backendUrl}subjects/createSubject`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -52,35 +47,51 @@ function Subject() {
 
   useEffect(() => {
     axios
-      .request(getConfig)
+      .request({
+        method: "get",
+        maxBodyLength: Infinity,
+        url:  `${backendUrl}subjects/getSubjects`,
+        headers: {},
+      })
       .then((response) => {
         setAllSubjects(response.data);
+        if (response.data.length === 0) {
+          setNoSubjects(true);
+        }
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
 
-  if (allSubjects.length === 0) {
-    sub = true;
-  }
+  const openModal = () => {
+    if (modalRef.current) {
+      modalRef.current.classList.remove("hidden");
+    }
+  };
+
+  const closeModal = () => {
+    if (modalRef.current) {
+      modalRef.current.classList.add("hidden");
+    }
+  };
 
   return (
     <>
-      {sub ? (
+      {noSubjects ? (
         // No subjects found
-        <div className="h-full flex flex-col gap-8 justify-center items-center">
+        <div className="h-full flex flex-col gap-4 justify-center items-center p-4">
           <h1 className="text-xl">No Subjects Added!</h1>
-          <div className="text-4xl">
+          <div className="text-4xl text-gray-500">
             <ImSad />
           </div>
         </div>
       ) : (
-        <div>
-          <h1 className="text-2xl">
-            <b>Your Subjects:</b>
+        <div className="p-4">
+          <h1 className="text-2xl font-semibold mb-4">
+            Your Subjects:
           </h1>
-          <div className="my-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {allSubjects.map((subject) => (
               <SubjectCard key={subject._id} subject={subject} />
             ))}
@@ -93,8 +104,7 @@ function Subject() {
         <button
           type="button"
           className="fixed bottom-6 right-6 rounded-full flex justify-center items-center text-white bg-blue-400 h-12 w-12 shadow-lg cursor-pointer hover:bg-blue-500"
-          data-modal-toggle="crud-modal"
-          onClick={() => modalRef.current.classList.remove("hidden")}
+          onClick={openModal}
         >
           <GrAdd />
         </button>
@@ -103,133 +113,102 @@ function Subject() {
           ref={modalRef}
           tabIndex="-1"
           aria-hidden="true"
-          className="hidden absolute h-screen w-full top-0 left-0 flex justify-center items-center backdrop-blur-lg"
+          className="hidden fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
         >
-          <div className="relative p-4 w-full max-w-md max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Add new Subject
-                </h3>
-                <button
-                  type="button"
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                  data-modal-toggle="crud-modal"
-                  onClick={() => modalRef.current.classList.add("hidden")}
-                >
-                  <svg
-                    className="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 14"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-                    />
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              <div className="p-4 md:p-5">
-                <div className="grid gap-4 mb-4 grid-cols-2">
-                  <div className="col-span-2">
+          <div className="bg-white rounded-lg overflow-hidden shadow-lg w-full max-w-md">
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Add New Subject
+              </h3>
+              <form onSubmit={handleAddSubject}>
+                <div className="grid gap-4">
+                  <div>
                     <label
                       htmlFor="subName"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      className="block text-sm font-medium text-gray-900"
                     >
-                      Subject name
+                      Subject Name
                     </label>
                     <input
                       type="text"
-                      name="subName"
                       id="subName"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Type subject name"
                       value={subName}
                       onChange={(e) => setSubName(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
-                      htmlFor="Teacher"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="teacher"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Teacher
                     </label>
                     <input
                       type="text"
-                      name="Teacher"
-                      id="Teacher"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      id="teacher"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Type teacher name"
                       value={teacher}
                       onChange={(e) => setTeacher(e.target.value)}
                       required
                     />
                   </div>
-                  <div className="col-span-2 sm:col-span-1">
+                  <div>
                     <label
                       htmlFor="color"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Subject Color
                     </label>
                     <select
                       id="color"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
                     >
-                      <option defaultValue={""}>Select color</option>
+                      <option value="">Select color</option>
                       <option value="lime">Lime</option>
                       <option value="sky">Sky</option>
                       <option value="purple">Purple</option>
                       <option value="rose">Rose</option>
                     </select>
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <label
-                      htmlFor="description"
-                      className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                      htmlFor="desc"
+                      className="block text-sm font-medium text-gray-900"
                     >
                       Subject Description
                     </label>
                     <textarea
-                      id="description"
-                      rows="4"
-                      className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                      placeholder="Write Subject description here"
+                      id="desc"
+                      rows="3"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Write subject description"
                       value={desc}
                       onChange={(e) => setDesc(e.target.value)}
                     ></textarea>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  onClick={handleAddSubject}
-                >
-                  <svg
-                    className="me-1 -ms-1 w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-sm text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+                    onClick={closeModal}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  Add new Subject
-                </button>
-              </div>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="ml-2 px-4 py-2 text-sm text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:bg-green-600"
+                  >
+                    Add Subject
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
